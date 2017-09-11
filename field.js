@@ -25,7 +25,7 @@ class Field {
     const newLines = _.cloneDeep(this.lines);
     for (let r = row; r < row + f.lines.length; r++) {
       if (r >= this.rows) return false;
-      for (let c = col; c < col + f.lines[0].length; c++) {
+      for (let c = col; c < col + f.getColsCount(); c++) {
         if (c >= this.cols) return false;
         if (newLines[r][c]) return false;
         newLines[r][c] = f.lines[r - row][c - col];

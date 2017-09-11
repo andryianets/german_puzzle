@@ -16,7 +16,7 @@ describe('Puzzle tests', () => {
   });
 
   it('should rotate figure', () => {
-    const f = new Figure([
+    const f = new Figure(0, [
       [1, 0],
       [1, 1],
       [1, 0],
@@ -41,7 +41,7 @@ describe('Puzzle tests', () => {
   });
 
   it('should correctly calc getMaxRotates', () => {
-    const f = new Figure([
+    const f = new Figure(0, [
       [1, 1, 1]
     ]);
 
@@ -56,7 +56,7 @@ describe('Puzzle tests', () => {
   });
 
   it('should place figure on field correctly', () => {
-    const f = new Figure([
+    const f = new Figure(0, [
       [1, 0],
       [1, 1],
       [1, 0],
@@ -112,8 +112,8 @@ describe('Puzzle tests', () => {
       }
     ];
 
-    tests.forEach(test => {
-      const f = new Figure(test.lines);
+    tests.forEach((test, figureIndex) => {
+      const f = new Figure(figureIndex, test.lines);
       corners.forEach((corner, i) => {
         expect(f.allowedForCorner(...corner)).to.eql(test.expects[i]);
       });

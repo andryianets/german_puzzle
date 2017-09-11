@@ -2,14 +2,24 @@ const _ = require('lodash');
 
 class Figure {
 
-  constructor(lines) {
+  constructor(id, lines) {
+    this.id = id;
     this.lines = lines;
+    this.linesInitial = lines;
     this.rotates = 0;
+  }
+
+  getRowsCount() {
+    return this.lines.length;
+  }
+
+  getColsCount() {
+    return this.lines[0].length;
   }
 
   getMaxRotates() {
     const rows = this.lines.length;
-    const cols = this.lines[0].length;
+    const cols = this.getColsCount();
 
     if (rows === 1 && cols === 1) return 1;
     if (rows === 1 || cols === 1) return 2;
@@ -17,11 +27,24 @@ class Figure {
     return 4;
   }
 
+  resetRotation() {
+    this.lines = this.linesInitial;
+    this.rotates = 0;
+  }
+
+  rotateMultiple(times) {
+    this.resetRotation();
+    _.times(times, () => {
+      this.rotate();
+    })
+    return this;
+  }
+
   rotate() {
     this.rotates = (this.rotates + 1) % this.getMaxRotates();
 
     const rows = this.lines.length;
-    const cols = this.lines[0].length;
+    const cols = this.getColsCount();
 
     const newLines = _.times(cols, () => _.times(rows, _.constant(0)));
 
@@ -39,7 +62,7 @@ class Figure {
   }
 
   allowedForCorner(r, c) {
-    const startPoint = {r: r ? this.lines.length - 1 : 0, c: c ? this.lines[0].length - 1 : 0};
+    const startPoint = {r: r ? this.lines.length - 1 : 0, c: c ? this.getColsCount() - 1 : 0};
     const direction = {r: r ? -1 : 1, c: c ? -1 : 1};
 
     // test rows
@@ -60,7 +83,7 @@ class Figure {
     do {
       test.push(this.lines[p.r][p.c]);
       p.c += direction.c;
-    } while (++counter < this.lines[0].length);
+    } while (++counter < this.getColsCount());
 
     if (/10+1/.test(test.join(''))) return false;
 
