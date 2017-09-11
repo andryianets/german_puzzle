@@ -47,7 +47,7 @@ describe('Puzzle tests', () => {
       [1, 0],
       [1, 0],
     ]);
-    expect(field.addFugure(f, 1, 3)).to.be.true;
+    expect(field.addFigure(f, 1, 3)).to.be.true;
     expect(field.lines).to.eql([
       [0, 0, 0, 0, 0],
       [0, 0, 0, 1, 0],

@@ -21,7 +21,7 @@ class Field {
     return this.filledCount() === this.cellsCount;
   }
 
-  addFugure(f, row = 0, col = 0) {
+  addFigure(f, row = 0, col = 0) {
     const newLines = _.cloneDeep(this.lines);
     for (let r = row; r < row + f.lines.length; r++) {
       if (r >= this.rows) return false;
