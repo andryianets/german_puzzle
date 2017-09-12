@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const fs = require('fs');
 
 const figuresData = require('./figuresData');
 const Field = require('./field');
@@ -31,7 +32,10 @@ figures.forEach(f => {
           f,
           figureId: f.id,
           corner,
-          cornerDesc: [...corner].join('-'),
+          pos: {
+            r: corner[0] ? ROWS_COUNT - f.getRowsCount() : 0,
+            c: corner[1] ? COLS_COUNT - f.getColsCount() : 0
+          },
           rotates
         });
       }
@@ -40,7 +44,7 @@ figures.forEach(f => {
   });
 });
 
-const cornerFiguresGrouped = _.groupBy(cornerFigures, 'cornerDesc');
+const cornerFiguresGrouped = _.groupBy(cornerFigures, 'corner');
 
 // console.log('cornerFigures length', cornerFigures.length);
 // console.log('cornerFigures:\r\n', cornerFigures);
@@ -50,14 +54,14 @@ const cornerFiguresGrouped = _.groupBy(cornerFigures, 'cornerDesc');
 
 const placements = [];
 
-_.forEach(cornerFiguresGrouped['0-0'], nwFigureData => {
+_.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
   field.clear();
 
   if (!field.addFigure(nwFigureData.f.rotateMultiple(nwFigureData.rotates), 0, 0)) {
     throw new Error('Unable set first!');
   }
 
-  _.forEach(cornerFiguresGrouped['0-1'], neFigureData => {
+  _.forEach(cornerFiguresGrouped['0,1'], neFigureData => {
 
     if (_.uniq([neFigureData.f.id, nwFigureData.f.id]).length < 2) return;
 
@@ -65,7 +69,7 @@ _.forEach(cornerFiguresGrouped['0-0'], nwFigureData => {
       return;
     }
 
-    _.forEach(cornerFiguresGrouped['1-0'], swFigureData => {
+    _.forEach(cornerFiguresGrouped['1,0'], swFigureData => {
 
       if (_.uniq([swFigureData.f.id, neFigureData.f.id, nwFigureData.f.id]).length < 3) return;
 
@@ -73,15 +77,18 @@ _.forEach(cornerFiguresGrouped['0-0'], nwFigureData => {
         return;
       }
 
-      _.forEach(cornerFiguresGrouped['1-1'], seFigureData => {
+      _.forEach(cornerFiguresGrouped['1,1'], seFigureData => {
 
         if (_.uniq([seFigureData.f.id, swFigureData.f.id, neFigureData.f.id, nwFigureData.f.id]).length < 4) return;
 
         if (field.addFigure(seFigureData.f.rotateMultiple(seFigureData.rotates), ROWS_COUNT - seFigureData.f.getRowsCount(), COLS_COUNT - seFigureData.f.getColsCount())) {
           placements.push({
             positions: [nwFigureData, neFigureData, swFigureData, seFigureData],
-            next: []
+            field: Field.clone(field),
+            next: [],
+            level: 0
           });
+          // console.log('\r\n', field.lines, '\r\n');
         }
 
       });
@@ -92,5 +99,64 @@ _.forEach(cornerFiguresGrouped['0-0'], nwFigureData => {
 
 });
 
-console.log('placements of cornered length', placements.length);
-console.log('placements of cornered', placements);
+// console.log('placements of cornered length', placements.length);
+// console.log('placements of cornered', placements);
+
+const successPlacements = [];
+buildPlacements(placements);
+fs.writeFileSync('./solve.json', JSON.stringify(successPlacements));
+
+/**
+ * Placements search recursive function
+ * @param placements
+ * @param level
+ */
+
+function buildPlacements(placements, level = 0) {
+  placements.forEach(placement => {
+    const existingIds = _.map(placement.positions, 'figureId');
+    const remainedFigures = figures.filter(f => !existingIds.includes(f.id));
+    remainedFigures.forEach(f => {
+      f.resetRotation();
+      _.times(f.getMaxRotates(), rotates => {
+
+        for (let r = 0; r <= ROWS_COUNT - f.getRowsCount(); r++) {
+          for (let c = 0; c <= COLS_COUNT - f.getColsCount(); c++) {
+
+            const subField = Field.clone(placement.field);
+            if (subField.addFigure(f, r, c)) {
+              const fData = {
+                f,
+                figureId: f.id,
+                pos: {r, c},
+                rotates
+              };
+              const subPlacement = {
+                positions: placement.positions.concat([fData]),
+                field: subField,
+                next: [],
+                level: placement.level + 1
+              };
+              placement.next.push(subPlacement);
+
+              // console.log(`Step info: level ${placement.level}, figure ${f.id} at [${r}, ${c}, rot=${rotates}]`);
+              // console.log(`Fill check: figures ${placement.positions.length}, progress ${subField.filledCount() + '/' + subField.cellsCount}`);
+
+              if (subField.isFullyFilled()) {
+                console.log('------ FIELD IS FILLED ----');
+                successPlacements.push(subPlacement);
+              }
+            }
+          }
+        }
+
+        f.rotate();
+      });
+    });
+    if (placement.next.length > 0) {
+      buildPlacements(placement.next, placement.level + 1);
+    } else {
+      // console.warn(`- Placement end at level ${placement.level}`);
+    }
+  });
+}

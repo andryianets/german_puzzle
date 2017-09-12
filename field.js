@@ -2,6 +2,12 @@ const _ = require('lodash');
 
 class Field {
 
+  static clone(field) {
+    const newField = new Field(field.rows, field.cols);
+    newField.lines = _.cloneDeep(field.lines);
+    return newField;
+  }
+
   constructor(rows, cols) {
     this.rows = rows;
     this.cols = cols;
