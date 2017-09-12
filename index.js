@@ -86,7 +86,8 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
             positions: [nwFigureData, neFigureData, swFigureData, seFigureData],
             field: Field.clone(field),
             next: [],
-            level: 0
+            level: 4,
+            indexPath: placements.length
           });
           // console.log('\r\n', field.lines, '\r\n');
         }
@@ -103,6 +104,8 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
 // console.log('placements of cornered', placements);
 
 const successPlacements = [];
+let maxFilled = 0;
+let maxFigures = 4;
 buildPlacements(placements);
 fs.writeFileSync('./solve.json', JSON.stringify(successPlacements));
 
@@ -112,10 +115,11 @@ fs.writeFileSync('./solve.json', JSON.stringify(successPlacements));
  * @param level
  */
 
-function buildPlacements(placements, level = 0) {
+function buildPlacements(placements) {
   placements.forEach(placement => {
     const existingIds = _.map(placement.positions, 'figureId');
     const remainedFigures = figures.filter(f => !existingIds.includes(f.id));
+    let subPlacementCounter = 0;
     remainedFigures.forEach(f => {
       f.resetRotation();
       _.times(f.getMaxRotates(), rotates => {
@@ -135,12 +139,23 @@ function buildPlacements(placements, level = 0) {
                 positions: placement.positions.concat([fData]),
                 field: subField,
                 next: [],
-                level: placement.level + 1
+                level: placement.level + 1,
+                indexPath: `${placement.indexPath}-${subPlacementCounter++}`
               };
               placement.next.push(subPlacement);
 
               // console.log(`Step info: level ${placement.level}, figure ${f.id} at [${r}, ${c}, rot=${rotates}]`);
               // console.log(`Fill check: figures ${placement.positions.length}, progress ${subField.filledCount() + '/' + subField.cellsCount}`);
+
+              if (subField.filledCount() > maxFilled) {
+                maxFilled = subField.filledCount();
+                console.log(`---- New filling max: figures ${placement.positions.length}, progress ${subField.filledCount() + '/' + subField.cellsCount}`);
+              }
+
+              if (placement.positions.length > maxFigures) {
+                maxFigures = placement.positions.length;
+                console.log(`---- New max figures: figures ${placement.positions.length}, progress ${subField.filledCount() + '/' + subField.cellsCount}`);
+              }
 
               if (subField.isFullyFilled()) {
                 console.log('------ FIELD IS FILLED ----');
@@ -154,7 +169,8 @@ function buildPlacements(placements, level = 0) {
       });
     });
     if (placement.next.length > 0) {
-      buildPlacements(placement.next, placement.level + 1);
+      console.log(`Info: level ${placement.level}, index ${placement.indexPath}, children to check ${placement.next.length}`);
+      buildPlacements(placement.next);
     } else {
       // console.warn(`- Placement end at level ${placement.level}`);
     }

@@ -9,6 +9,10 @@ class Figure {
     this.rotates = 0;
   }
 
+  filledCount() {
+    return _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
+  }
+
   getRowsCount() {
     return this.lines.length;
   }
