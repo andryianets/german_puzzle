@@ -53,7 +53,7 @@ const cornerFiguresGrouped = _.groupBy(cornerFigures, 'corner');
 // 2. placing
 
 const placements = [];
-const hashes = [];
+const hashes = {};
 
 _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
   field.clear();
@@ -97,6 +97,15 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
         if (field.addFigure(seFigureData.f.rotateMultiple(seFigureData.rotates), ROWS_COUNT - seFigureData.f.getRowsCount(), COLS_COUNT - seFigureData.f.getColsCount())) {
           const positions = [nwFigureData, neFigureData, seFigureData, swFigureData];
           const figuresHashData = positions.map(fPos => `${fPos.figureId}_${fPos.rotates}`);
+
+          if (
+            hashes[[figuresHashData[1], figuresHashData[2], figuresHashData[3], figuresHashData[0]].join(':')] ||
+            hashes[[figuresHashData[2], figuresHashData[3], figuresHashData[0], figuresHashData[1]].join(':')] ||
+            hashes[[figuresHashData[3], figuresHashData[0], figuresHashData[1], figuresHashData[2]].join(':')]
+          ) {
+            return;
+          }
+
           placements.push({
             positions,
             field: Field.clone(field),
@@ -105,7 +114,7 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
             indexPath: placements.length,
             figuresHash: figuresHashData.join(':')
           });
-          hashes.push(figuresHashData.join(':'));
+          hashes[figuresHashData.join(':')] = 1;
           // console.log('\r\n', field.lines, '\r\n');
         }
 
@@ -117,7 +126,7 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
 
 });
 
-// console.log('placements of cornered length', placements.length, _.uniq(hashes).length);
+console.log('placements of cornered length', placements.length);
 // console.log('placements of cornered', placements);
 
 
