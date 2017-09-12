@@ -169,7 +169,9 @@ function buildPlacements(placements) {
       });
     });
     if (placement.next.length > 0) {
-      console.log(`Info: level ${placement.level}, index ${placement.indexPath}, children to check ${placement.next.length}`);
+      if (placement.level === maxFigures) {
+        console.log(`Info: level ${placement.level}, index ${placement.indexPath}, children to check ${placement.next.length}`);
+      }
       buildPlacements(placement.next);
     } else {
       // console.warn(`- Placement end at level ${placement.level}`);
