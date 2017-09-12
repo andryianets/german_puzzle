@@ -53,6 +53,7 @@ const cornerFiguresGrouped = _.groupBy(cornerFigures, 'corner');
 // 2. placing
 
 const placements = [];
+const hashes = [];
 
 _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
   field.clear();
@@ -61,34 +62,50 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
     throw new Error('Unable set first!');
   }
 
+  const nwField = Field.clone(field);
+
   _.forEach(cornerFiguresGrouped['0,1'], neFigureData => {
 
-    if (_.uniq([neFigureData.f.id, nwFigureData.f.id]).length < 2) return;
+    field.fillFromField(nwField);
+
+    if (_.uniq([neFigureData.figureId, nwFigureData.figureId]).length < 2) return;
 
     if (!field.addFigure(neFigureData.f.rotateMultiple(neFigureData.rotates), 0, COLS_COUNT - neFigureData.f.getColsCount())) {
       return;
     }
 
+    const neField = Field.clone(field);
+
     _.forEach(cornerFiguresGrouped['1,0'], swFigureData => {
 
-      if (_.uniq([swFigureData.f.id, neFigureData.f.id, nwFigureData.f.id]).length < 3) return;
+      field.fillFromField(neField);
+
+      if (_.uniq([swFigureData.figureId, neFigureData.figureId, nwFigureData.figureId]).length < 3) return;
 
       if (!field.addFigure(swFigureData.f.rotateMultiple(swFigureData.rotates), ROWS_COUNT - swFigureData.f.getRowsCount(), 0)) {
         return;
       }
 
+      const swField = Field.clone(field);
+
       _.forEach(cornerFiguresGrouped['1,1'], seFigureData => {
 
-        if (_.uniq([seFigureData.f.id, swFigureData.f.id, neFigureData.f.id, nwFigureData.f.id]).length < 4) return;
+        field.fillFromField(swField);
+
+        if (_.uniq([seFigureData.figureId, swFigureData.figureId, neFigureData.figureId, nwFigureData.figureId]).length < 4) return;
 
         if (field.addFigure(seFigureData.f.rotateMultiple(seFigureData.rotates), ROWS_COUNT - seFigureData.f.getRowsCount(), COLS_COUNT - seFigureData.f.getColsCount())) {
+          const positions = [nwFigureData, neFigureData, seFigureData, swFigureData];
+          const figuresHashData = positions.map(fPos => `${fPos.figureId}_${fPos.rotates}`);
           placements.push({
-            positions: [nwFigureData, neFigureData, swFigureData, seFigureData],
+            positions,
             field: Field.clone(field),
             next: [],
             level: 4,
-            indexPath: placements.length
+            indexPath: placements.length,
+            figuresHash: figuresHashData.join(':')
           });
+          hashes.push(figuresHashData.join(':'));
           // console.log('\r\n', field.lines, '\r\n');
         }
 
@@ -100,14 +117,15 @@ _.forEach(cornerFiguresGrouped['0,0'], nwFigureData => {
 
 });
 
-// console.log('placements of cornered length', placements.length);
+// console.log('placements of cornered length', placements.length, _.uniq(hashes).length);
 // console.log('placements of cornered', placements);
+
 
 const successPlacements = [];
 let maxFilled = 0;
 let maxFigures = 4;
 buildPlacements(placements);
-fs.writeFileSync('./solve.json', JSON.stringify(successPlacements));
+// fs.writeFileSync('./solve.json', JSON.stringify(successPlacements));
 
 /**
  * Placements search recursive function
@@ -159,6 +177,7 @@ function buildPlacements(placements) {
 
               if (subField.isFullyFilled()) {
                 console.log('------ FIELD IS FILLED ----');
+                fs.writeFileSync(`./solve-${subPlacement.indexPath}.json`, JSON.stringify(subPlacement.positions));
                 successPlacements.push(subPlacement);
               }
             }

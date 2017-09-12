@@ -15,6 +15,10 @@ class Field {
     this.clear();
   }
 
+  fillFromField(field) {
+    this.lines = _.cloneDeep(field.lines);
+  }
+
   clear() {
     this.lines = _.times(this.rows, () => _.times(this.cols, _.constant(0)));
   }
