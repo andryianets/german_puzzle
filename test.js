@@ -38,8 +38,9 @@ describe('Puzzle tests', () => {
       [1, 0],
       [1, 0],
     ]);
-    expect(field.addFigure(f, 3, 2, 1)).to.be.true;
-    expect(field.addFigure(f2, 0, 1, 0)).to.be.true;
+    f.rotate();
+    expect(field.addFigure(f, 3, 2)).to.be.true;
+    expect(field.addFigure(f2, 0, 1)).to.be.true;
     expect(field.hasFigure(f.id)).to.be.true;
     expect(field.hasFigure(f2.id)).to.be.true;
     expect(Object.keys(field.busyCells)).to.have.members([
@@ -55,7 +56,7 @@ describe('Puzzle tests', () => {
       [1, 0],
       [1, 0],
     ]);
-    expect(field.addFigure(f, 4, 1, 0)).to.be.false;
+    expect(field.addFigure(f, 4, 1)).to.be.false;
   });
 
   it('should fail to add figure if overlaps', () => {
@@ -69,8 +70,8 @@ describe('Puzzle tests', () => {
       [1, 0],
       [1, 0],
     ]);
-    expect(field.addFigure(f, 1, 0, 0)).to.be.true;
-    expect(field.addFigure(f2, 0, 1, 0)).to.be.false;
+    expect(field.addFigure(f, 1, 0)).to.be.true;
+    expect(field.addFigure(f2, 0, 1)).to.be.false;
   });
 
 });

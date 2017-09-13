@@ -7,8 +7,6 @@ module.exports = class Field {
     this.cols = cols;
     this.cellsCount = rows * cols;
     this.filledCount = 0;
-    this.cellsTotalSum = this.cellsCount * (this.cellsCount - 1) / 2;
-    this.cellsCurrentSum = 0;
     this.cells = _.times(this.rows, rowIndex => _.times(this.cols, colIndex => colIndex + rows * rowIndex));
 
     /**
@@ -48,22 +46,20 @@ module.exports = class Field {
     this.figureLocations = [];
     this.figureIds = {};
     this.busyCells = {};
-    this.cellsCurrentSum = 0;
     this.filledCount = 0;
   }
 
   clone() {
     const clonedField = new Field(this.rows, this.cols);
     clonedField.figureLocations = _.clone(this.figureLocations);
-    clonedField.busyCells = _.clone(this.figureLocations);
+    clonedField.busyCells = _.clone(this.busyCells);
     clonedField.figureIds = _.clone(this.figureIds);
     clonedField.indexPath = this.indexPath;
+    clonedField.filledCount = this.filledCount;
     return clonedField;
   }
 
-  addFigure(f, row = 0, col = 0, rotates = 0) {
-    f.rotateMultiple(rotates);
-
+  addFigure(f, row = 0, col = 0) {
     if (this.figureIds[f.id]) {
       // console.warn('figure is already added!');
       return false;
@@ -78,7 +74,7 @@ module.exports = class Field {
       const rowItems = f.lines[rowIndex];
       for (let colIndex in rowItems) {
         if (rowItems[colIndex]) {
-          const cellValue = this.cells[1*rowIndex + row][1*colIndex + col];
+          const cellValue = this.cells[1 * rowIndex + row][1 * colIndex + col];
           if (this.busyCells[cellValue]) {
             // console.warn('figure overlaps others!');
             return false;
@@ -88,13 +84,12 @@ module.exports = class Field {
       }
     }
 
-    figureBusyCells.forEach(cellValue => {
+    for (let cellValue of figureBusyCells) {
       this.busyCells[cellValue] = true;
-      this.cellsCurrentSum += cellValue;
       this.filledCount++;
-    });
+    }
 
-    this.figureLocations.push({id: f.id, row, col, rotates});
+    this.figureLocations.push({id: f.id, row, col, rotates: f.rotates});
     this.figureIds[f.id] = true;
 
     return true;

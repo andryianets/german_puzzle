@@ -21,10 +21,10 @@ module.exports = class Figure {
   }
 
   get maxRotates() {
-    if (this.rowsCount === 1 && this.colsCount === 1) return 1;
-    if (this.rowsCount === 1 || this.colsCount === 1) return 2;
+    if (this.rowsCount === 1 && this.colsCount === 1) return 0;
+    if (this.rowsCount === 1 || this.colsCount === 1) return 1;
 
-    return 4;
+    return 3;
   }
 
   resetRotation() {
@@ -32,16 +32,8 @@ module.exports = class Figure {
     this.rotates = 0;
   }
 
-  rotateMultiple(times) {
-    this.resetRotation();
-    _.times(times, () => {
-      this.rotate();
-    })
-    return this;
-  }
-
   rotate() {
-    this.rotates = (this.rotates + 1) % this.maxRotates;
+    this.rotates = (this.rotates + 1) % (this.maxRotates + 1);
 
     const rows = this.rowsCount;
     const cols = this.colsCount;
@@ -83,7 +75,7 @@ module.exports = class Figure {
     do {
       test.push(this.lines[p.r][p.c]);
       p.c += direction.c;
-    } while (++counter < this.getColsCount());
+    } while (++counter < this.colsCount);
 
     if (/10+1/.test(test.join(''))) return false;
 
