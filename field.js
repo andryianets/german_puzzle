@@ -18,6 +18,8 @@ module.exports = class Field {
     this.figureLocations = [];
     this.figureIds = {};
     this.busyCells = {};
+
+    this.indexPath = '';
   }
 
   get nextRowToFill() {
@@ -52,9 +54,10 @@ module.exports = class Field {
 
   clone() {
     const clonedField = new Field(this.rows, this.cols);
-    this.figureLocations = _.clone(this.figureLocations);
-    this.busyCells = _.clone(this.figureLocations);
-    this.figureIds = _.clone(this.figureIds);
+    clonedField.figureLocations = _.clone(this.figureLocations);
+    clonedField.busyCells = _.clone(this.figureLocations);
+    clonedField.figureIds = _.clone(this.figureIds);
+    clonedField.indexPath = this.indexPath;
     return clonedField;
   }
 
@@ -91,7 +94,7 @@ module.exports = class Field {
       this.filledCount++;
     });
 
-    this.figureLocations.push({f, row, col, rotates});
+    this.figureLocations.push({id: f.id, row, col, rotates});
     this.figureIds[f.id] = true;
 
     return true;
