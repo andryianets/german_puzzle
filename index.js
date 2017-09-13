@@ -133,7 +133,8 @@ console.log('placements of cornered length', placements.length);
 const successPlacements = [];
 let maxFilled = 0;
 let maxFigures = 4;
-buildPlacements(placements);
+buildPlacements(_.shuffle(placements));
+
 // fs.writeFileSync('./solve.json', JSON.stringify(successPlacements));
 
 /**
@@ -200,7 +201,9 @@ function buildPlacements(placements) {
       if (placement.level === maxFigures) {
         console.log(`Info: level ${placement.level}, index ${placement.indexPath}, children to check ${placement.next.length}`);
       }
-      buildPlacements(placement.next);
+      setImmediate(() => {
+        buildPlacements(_.shuffle(placement.next));
+      });
     } else {
       // console.warn(`- Placement end at level ${placement.level}`);
     }
