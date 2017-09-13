@@ -20,16 +20,26 @@ module.exports = class Field {
     this.busyCells = {};
   }
 
-  isRowBusy(rowIndex) {
-    return false;
-  }
-
-  isColBusy(colIndex) {
-    return false;
+  get nextRowToFill() {
+    let nextRow = 0;
+    for (let rowIndex in this.cells) {
+      const rowItems = this.cells[rowIndex];
+      const rowFilled = rowItems.reduce((acc, val) => acc && this.busyCells[val], true);
+      if (rowFilled) {
+        nextRow++;
+      } else {
+        return nextRow;
+      }
+    }
+    return nextRow;
   }
 
   get isFilled() {
     return this.filledCount === this.cellsCount;
+  }
+
+  hasFigure(id) {
+    return this.figureIds[id] !== undefined;
   }
 
   clear() {

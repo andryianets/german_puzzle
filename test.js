@@ -40,6 +40,8 @@ describe('Puzzle tests', () => {
     ]);
     expect(field.addFigure(f, 3, 2, 1)).to.be.true;
     expect(field.addFigure(f2, 0, 1, 0)).to.be.true;
+    expect(field.hasFigure(f.id)).to.be.true;
+    expect(field.hasFigure(f2.id)).to.be.true;
     expect(Object.keys(field.busyCells)).to.have.members([
       '23', '17', '18',
       '1', '6', '11', '16', '7'
