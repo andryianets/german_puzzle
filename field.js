@@ -1,49 +1,70 @@
 const _ = require('lodash');
 
-class Field {
-
-  static clone(field) {
-    const newField = new Field(field.rows, field.cols);
-    newField.lines = _.cloneDeep(field.lines);
-    return newField;
-  }
+module.exports = class Field {
 
   constructor(rows, cols) {
     this.rows = rows;
     this.cols = cols;
     this.cellsCount = rows * cols;
-    this.clear();
+    this.cellsTotalSum = this.cellsCount * (this.cellsCount - 1) / 2;
+    this.cells = _.times(this.rows, rowIndex => _.times(this.cols, colIndex => colIndex + rows * rowIndex));
+
+    /**
+     * Locations in form { figure, row, col, rotates }
+     * @type {Array}
+     */
+    this.figureLocations = [];
+    this.figureIds = {};
+    this.busyCells = {};
   }
 
-  fillFromField(field) {
-    this.lines = _.cloneDeep(field.lines);
+  isRowBusy(rowIndex) {
+    return false;
+  }
+
+  isColBusy(colIndex) {
+    return false;
   }
 
   clear() {
-    this.lines = _.times(this.rows, () => _.times(this.cols, _.constant(0)));
+    this.figureLocations = [];
+    this.figureIds = {};
+    this.busyCells = {};
   }
 
-  filledCount() {
-    return _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
+  clone() {
+    const clonedField = new Field(this.rows, this.cols);
+    this.figureLocations = _.clone(this.figureLocations);
+    this.busyCells = _.clone(this.figureLocations);
+    this.figureIds = _.clone(this.figureIds);
+    return clonedField;
   }
 
-  isFullyFilled() {
-    return this.filledCount() === this.cellsCount;
-  }
+  addFigure(f, row = 0, col = 0, rotates = 0) {
+    f.rotateMultiple(rotates);
 
-  addFigure(f, row = 0, col = 0) {
-    const newLines = _.cloneDeep(this.lines);
-    for (let r = row; r < row + f.lines.length; r++) {
-      if (r >= this.rows) return false;
-      for (let c = col; c < col + f.getColsCount(); c++) {
-        if (c >= this.cols) return false;
-        if (newLines[r][c]) return false;
-        newLines[r][c] = f.lines[r - row][c - col];
-      }
-    }
-    this.lines = newLines;
+    if (this.figureIds[f.id]) return false;
+    if ((row + f.rowsCount > this.rows - 1) || (col + f.colsCount > this.cols - 1)) return false;
+
+    const figureBusyCells = [];
+    f.lines.forEach((rowItems, rowIndex) => {
+      rowItems.forEach((flag, colIndex) => {
+        if (flag) {
+          const cellValue = this.cells[rowIndex + row][colIndex + col];
+          if (this.busyCells[cellValue]) return false;
+          figureBusyCells.push(cellValue);
+        }
+      });
+    });
+
+    figureBusyCells.forEach(cellValue => {
+      this.busyCells[cellValue] = true;
+    });
+
+    this.figureLocations.push({ f, row, col, rotates });
+    this.figureIds[f.id] = true;
+
     return true;
   }
-}
 
-module.exports = Field;
+}

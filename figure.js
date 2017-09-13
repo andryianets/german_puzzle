@@ -7,21 +7,18 @@ class Figure {
     this.lines = lines;
     this.linesInitial = lines;
     this.rotates = 0;
+    this.filledCount = _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
   }
 
-  filledCount() {
-    return _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
-  }
-
-  getRowsCount() {
+  get rowsCount() {
     return this.lines.length;
   }
 
-  getColsCount() {
+  get colsCount() {
     return this.lines[0].length;
   }
 
-  getMaxRotates() {
+  get maxRotates() {
     const rows = this.lines.length;
     const cols = this.getColsCount();
 
@@ -45,7 +42,7 @@ class Figure {
   }
 
   rotate() {
-    this.rotates = (this.rotates + 1) % this.getMaxRotates();
+    this.rotates = (this.rotates + 1) % this.maxRotates;
 
     const rows = this.lines.length;
     const cols = this.getColsCount();
@@ -92,6 +89,10 @@ class Figure {
     if (/10+1/.test(test.join(''))) return false;
 
     return true;
+  }
+
+  toString() {
+    return this.lines.map(row => row.join(' ')).join('\r\n');
   }
 
 }
