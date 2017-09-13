@@ -45,7 +45,9 @@ function doStep(prevField, level = 1) {
       if (rowToFill + f.rowsCount > ROWS_COUNT - 1) return;
       for (col = 0; col <= COLS_COUNT - f.colsCount; col++) {
         const field = prevField.clone();
-        if (field.addFigure(f, rowToFill, col)) {
+        if (subIndexPathCounter < 50 && field.addFigure(f, rowToFill, col)) {
+
+          field.indexPath += `-${subIndexPathCounter++}`;
 
           if (field.filledCount > maxFilledCount) {
             maxFilledCount = field.filledCount;
@@ -57,11 +59,10 @@ function doStep(prevField, level = 1) {
             console.log('maxRow', maxRow);
           }
 
-          // console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
+          console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
           // console.log(prevField.figureLocations);
           // console.log(field.figureLocations);
 
-          field.indexPath += `-${subIndexPathCounter++}`;
           if (field.isFilled) {
             console.log('FOUND!!!!', field.indexPath, field.figureLocations);
             fs.writeFileSync(`./solve-${field.indexPath}.json`, JSON.stringify(field.figureLocations));

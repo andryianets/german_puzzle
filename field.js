@@ -85,7 +85,7 @@ module.exports = class Field {
     }
 
     for (let cellValue of figureBusyCells) {
-      this.busyCells[cellValue] = true;
+      this.busyCells[cellValue] = `${f.id}_${f.rotates}`;
       this.filledCount++;
     }
 
