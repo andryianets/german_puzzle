@@ -1,9 +1,11 @@
 const _ = require('lodash');
 
-class Figure {
+let counter = 0;
 
-  constructor(id, lines) {
-    this.id = id;
+module.exports = class Figure {
+
+  constructor(lines) {
+    this.id = counter++;
     this.lines = lines;
     this.linesInitial = lines;
     this.rotates = 0;
@@ -19,11 +21,8 @@ class Figure {
   }
 
   get maxRotates() {
-    const rows = this.lines.length;
-    const cols = this.getColsCount();
-
-    if (rows === 1 && cols === 1) return 1;
-    if (rows === 1 || cols === 1) return 2;
+    if (this.rowsCount === 1 && this.colsCount === 1) return 1;
+    if (this.rowsCount === 1 || this.colsCount === 1) return 2;
 
     return 4;
   }
@@ -44,8 +43,8 @@ class Figure {
   rotate() {
     this.rotates = (this.rotates + 1) % this.maxRotates;
 
-    const rows = this.lines.length;
-    const cols = this.getColsCount();
+    const rows = this.rowsCount;
+    const cols = this.colsCount;
 
     const newLines = _.times(cols, () => _.times(rows, _.constant(0)));
 
@@ -73,7 +72,7 @@ class Figure {
     do {
       test.push(this.lines[p.r][p.c]);
       p.r += direction.r;
-    } while (++counter < this.lines.length);
+    } while (++counter < this.rowsCount);
 
     if (/10+1/.test(test.join(''))) return false;
 
@@ -96,5 +95,3 @@ class Figure {
   }
 
 }
-
-module.exports = Figure;

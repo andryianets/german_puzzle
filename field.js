@@ -6,7 +6,9 @@ module.exports = class Field {
     this.rows = rows;
     this.cols = cols;
     this.cellsCount = rows * cols;
+    this.filledCount = 0;
     this.cellsTotalSum = this.cellsCount * (this.cellsCount - 1) / 2;
+    this.cellsCurrentSum = 0;
     this.cells = _.times(this.rows, rowIndex => _.times(this.cols, colIndex => colIndex + rows * rowIndex));
 
     /**
@@ -26,10 +28,16 @@ module.exports = class Field {
     return false;
   }
 
+  get isFilled() {
+    return this.filledCount === this.cellsCount;
+  }
+
   clear() {
     this.figureLocations = [];
     this.figureIds = {};
     this.busyCells = {};
+    this.cellsCurrentSum = 0;
+    this.filledCount = 0;
   }
 
   clone() {
@@ -43,25 +51,37 @@ module.exports = class Field {
   addFigure(f, row = 0, col = 0, rotates = 0) {
     f.rotateMultiple(rotates);
 
-    if (this.figureIds[f.id]) return false;
-    if ((row + f.rowsCount > this.rows - 1) || (col + f.colsCount > this.cols - 1)) return false;
+    if (this.figureIds[f.id]) {
+      // console.warn('figure is already added!');
+      return false;
+    }
+    if ((row + f.rowsCount > this.rows) || (col + f.colsCount > this.cols)) {
+      // console.warn('figure is out of limits!');
+      return false;
+    }
 
     const figureBusyCells = [];
-    f.lines.forEach((rowItems, rowIndex) => {
-      rowItems.forEach((flag, colIndex) => {
-        if (flag) {
-          const cellValue = this.cells[rowIndex + row][colIndex + col];
-          if (this.busyCells[cellValue]) return false;
+    for (let rowIndex in f.lines) {
+      const rowItems = f.lines[rowIndex];
+      for (let colIndex in rowItems) {
+        if (rowItems[colIndex]) {
+          const cellValue = this.cells[1*rowIndex + row][1*colIndex + col];
+          if (this.busyCells[cellValue]) {
+            // console.warn('figure overlaps others!');
+            return false;
+          }
           figureBusyCells.push(cellValue);
         }
-      });
-    });
+      }
+    }
 
     figureBusyCells.forEach(cellValue => {
       this.busyCells[cellValue] = true;
+      this.cellsCurrentSum += cellValue;
+      this.filledCount++;
     });
 
-    this.figureLocations.push({ f, row, col, rotates });
+    this.figureLocations.push({f, row, col, rotates});
     this.figureIds[f.id] = true;
 
     return true;
