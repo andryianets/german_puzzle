@@ -11,6 +11,9 @@ const figures = figuresData.map(lines => new Figure(lines));
 
 // start here...
 let indexPathCounter = 0;
+let maxFilledCount = 0;
+let maxRow = 0;
+
 for (let f of figures) {
   for (let rotates = 0; rotates < f.maxRotates + 1; rotates++) {
     const field = new Field(ROWS_COUNT, COLS_COUNT);
@@ -44,7 +47,17 @@ function doStep(prevField, level = 1) {
         const field = prevField.clone();
         if (field.addFigure(f, rowToFill, col)) {
 
-          console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
+          if (field.filledCount > maxFilledCount) {
+            maxFilledCount = field.filledCount;
+            console.log('maxFilledCount', maxFilledCount);
+          }
+
+          if (rowToFill > maxRow) {
+            maxRow = rowToFill;
+            console.log('maxRow', maxRow);
+          }
+
+          // console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
           // console.log(prevField.figureLocations);
           // console.log(field.figureLocations);
 
