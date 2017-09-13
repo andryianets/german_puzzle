@@ -15,7 +15,7 @@ let maxFilledCount = 0;
 let maxRow = 0;
 
 for (let f of figures) {
-  for (let rotates = 0; rotates < f.maxRotates + 1; rotates++) {
+  for (let rotates = 0; rotates <= f.maxRotates; rotates++) {
     const field = new Field(ROWS_COUNT, COLS_COUNT);
     if (f.allowedForCorner(0, 0) && field.addFigure(f, 0, 0)) {
       field.indexPath = `${indexPathCounter++}`;
@@ -40,8 +40,8 @@ function doStep(prevField, level = 1) {
   }
 
   let subIndexPathCounter = 0;
-  for (let f of figures) {
-    for (let rotates = 0; rotates < f.maxRotates + 1; rotates++) {
+  for (let f of freeFigures) {
+    for (let rotates = 0; rotates <= f.maxRotates; rotates++) {
       if (rowToFill + f.rowsCount > ROWS_COUNT - 1) return;
       for (col = 0; col <= COLS_COUNT - f.colsCount; col++) {
         const field = prevField.clone();
@@ -63,7 +63,7 @@ function doStep(prevField, level = 1) {
 
           field.indexPath += `-${subIndexPathCounter++}`;
           if (field.isFilled) {
-            console.log('FOUND!!!!');
+            console.log('FOUND!!!!', field.indexPath, field.figureLocations);
             fs.writeFileSync(`./solve-${field.indexPath}.json`, JSON.stringify(field.figureLocations));
           } else {
             doStep(field, level + 1);
