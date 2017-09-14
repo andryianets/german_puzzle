@@ -95,6 +95,18 @@ module.exports = class Field {
     return true;
   }
 
+  get figuresHash() {
+    const outLines = [];
+    for (let rowCells of this.cells) {
+      const outLine = rowCells.map(cellValue => {
+        const [fId,] = (this.busyCells[cellValue] || '').split('_');
+        return fId || '_';
+      });
+      outLines.push(outLine.join(''));
+    }
+    return outLines.join('');
+  }
+
   toString() {
     const outLines = [];
     for (let rowCells of this.cells) {

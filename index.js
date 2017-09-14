@@ -62,13 +62,19 @@ function doStep(prevField, level = 1) {
             console.log('maxRow', maxRow);
           }
 
-          console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
-          console.log(prevField.toString());
-          console.log(field.toString());
+          // console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
+          // console.log(prevField.toString());
+          // console.log(field.toString());
 
           if (field.isFilled) {
-            console.log('FOUND!!!!', field.indexPath, field.figureLocations);
-            fs.writeFileSync(`./solves/solve-${field.indexPath}.txt`, field.toString());
+            const fName = `./solves/solve-${field.figuresHash}.txt`;
+            if (fs.existsSync(fName)) {
+              // console.warn('DUPLICATE!!!!', field.indexPath);
+            } else {
+              console.log('FOUND!!!!', field.indexPath);
+              console.log(field.toString());
+              fs.writeFileSync(fName, field.toString());
+            }
             return;
           } else {
             doStep(field, level + 1);
@@ -80,6 +86,6 @@ function doStep(prevField, level = 1) {
     f.resetRotation();
   }
 
-  console.log(`<-- Back to prev level from ${level} to ${level - 1} \r\n`);
+  // console.log(`<-- Back to prev level from ${level} to ${level - 1} \r\n`);
 
 }
