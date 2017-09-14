@@ -1,49 +1,110 @@
 const _ = require('lodash');
 
-class Field {
-
-  static clone(field) {
-    const newField = new Field(field.rows, field.cols);
-    newField.lines = _.cloneDeep(field.lines);
-    return newField;
-  }
+module.exports = class Field {
 
   constructor(rows, cols) {
     this.rows = rows;
     this.cols = cols;
     this.cellsCount = rows * cols;
-    this.clear();
+    this.filledCount = 0;
+    this.cells = _.times(this.rows, rowIndex => _.times(this.cols, colIndex => colIndex + rows * rowIndex));
+
+    /**
+     * Locations in form { figure, row, col, rotates }
+     * @type {Array}
+     */
+    this.figureLocations = [];
+    this.figureIds = {};
+    this.busyCells = {};
+
+    this.indexPath = '0';
   }
 
-  fillFromField(field) {
-    this.lines = _.cloneDeep(field.lines);
+  get nextRowToFill() {
+    let nextRow = 0;
+    for (let rowIndex in this.cells) {
+      const rowItems = this.cells[rowIndex];
+      const rowFilled = rowItems.reduce((acc, val) => acc && this.busyCells[val], true);
+      if (rowFilled) {
+        nextRow++;
+      } else {
+        return nextRow;
+      }
+    }
+    return nextRow;
+  }
+
+  get isFilled() {
+    return this.filledCount === this.cellsCount;
+  }
+
+  hasFigure(id) {
+    return this.figureIds[id] !== undefined;
   }
 
   clear() {
-    this.lines = _.times(this.rows, () => _.times(this.cols, _.constant(0)));
+    this.figureLocations = [];
+    this.figureIds = {};
+    this.busyCells = {};
+    this.filledCount = 0;
   }
 
-  filledCount() {
-    return _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
-  }
-
-  isFullyFilled() {
-    return this.filledCount() === this.cellsCount;
+  clone() {
+    const clonedField = new Field(this.rows, this.cols);
+    clonedField.figureLocations = _.clone(this.figureLocations);
+    clonedField.busyCells = _.clone(this.busyCells);
+    clonedField.figureIds = _.clone(this.figureIds);
+    clonedField.indexPath = this.indexPath;
+    clonedField.filledCount = this.filledCount;
+    return clonedField;
   }
 
   addFigure(f, row = 0, col = 0) {
-    const newLines = _.cloneDeep(this.lines);
-    for (let r = row; r < row + f.lines.length; r++) {
-      if (r >= this.rows) return false;
-      for (let c = col; c < col + f.getColsCount(); c++) {
-        if (c >= this.cols) return false;
-        if (newLines[r][c]) return false;
-        newLines[r][c] = f.lines[r - row][c - col];
+    if (this.figureIds[f.id]) {
+      // console.warn('figure is already added!');
+      return false;
+    }
+    if ((row + f.rowsCount > this.rows) || (col + f.colsCount > this.cols)) {
+      // console.warn('figure is out of limits!');
+      return false;
+    }
+
+    const figureBusyCells = [];
+    for (let rowIndex in f.lines) {
+      const rowItems = f.lines[rowIndex];
+      for (let colIndex in rowItems) {
+        if (rowItems[colIndex]) {
+          const cellValue = this.cells[1 * rowIndex + row][1 * colIndex + col];
+          if (this.busyCells[cellValue]) {
+            // console.warn('figure overlaps others!');
+            return false;
+          }
+          figureBusyCells.push(cellValue);
+        }
       }
     }
-    this.lines = newLines;
+
+    for (let cellValue of figureBusyCells) {
+      this.busyCells[cellValue] = `${f.id}_${f.rotates}`;
+      this.filledCount++;
+    }
+
+    this.figureLocations.push({id: f.id, row, col, rotates: f.rotates});
+    this.figureIds[f.id] = true;
+
     return true;
   }
-}
 
-module.exports = Field;
+  toString() {
+    const outLines = [];
+    for (let rowCells of this.cells) {
+      const outLine = rowCells.map(cellValue => {
+        const [fId,] = (this.busyCells[cellValue] || '').split('_');
+        return fId || '·';
+      });
+      outLines.push('│ ' + outLine.join(' ') + ' │');
+    }
+    return '┌───────────────┐\r\n' + outLines.join('\r\n') + '\r\n└───────────────┘\r\n';
+  }
+
+}

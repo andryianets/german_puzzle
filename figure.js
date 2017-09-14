@@ -1,34 +1,30 @@
 const _ = require('lodash');
 
-class Figure {
+let counter = 0;
 
-  constructor(id, lines) {
-    this.id = id;
+module.exports = class Figure {
+
+  constructor(lines) {
+    this.id = counter++;
     this.lines = lines;
     this.linesInitial = lines;
     this.rotates = 0;
+    this.filledCount = _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
   }
 
-  filledCount() {
-    return _.flatten(this.lines).reduce((acc, val) => acc + val, 0);
-  }
-
-  getRowsCount() {
+  get rowsCount() {
     return this.lines.length;
   }
 
-  getColsCount() {
+  get colsCount() {
     return this.lines[0].length;
   }
 
-  getMaxRotates() {
-    const rows = this.lines.length;
-    const cols = this.getColsCount();
+  get maxRotates() {
+    if (this.rowsCount === 1 && this.colsCount === 1) return 0;
+    if (this.rowsCount === 1 || this.colsCount === 1) return 1;
 
-    if (rows === 1 && cols === 1) return 1;
-    if (rows === 1 || cols === 1) return 2;
-
-    return 4;
+    return 3;
   }
 
   resetRotation() {
@@ -36,19 +32,11 @@ class Figure {
     this.rotates = 0;
   }
 
-  rotateMultiple(times) {
-    this.resetRotation();
-    _.times(times, () => {
-      this.rotate();
-    })
-    return this;
-  }
-
   rotate() {
-    this.rotates = (this.rotates + 1) % this.getMaxRotates();
+    this.rotates = (this.rotates + 1) % (this.maxRotates + 1);
 
-    const rows = this.lines.length;
-    const cols = this.getColsCount();
+    const rows = this.rowsCount;
+    const cols = this.colsCount;
 
     const newLines = _.times(cols, () => _.times(rows, _.constant(0)));
 
@@ -76,7 +64,7 @@ class Figure {
     do {
       test.push(this.lines[p.r][p.c]);
       p.r += direction.r;
-    } while (++counter < this.lines.length);
+    } while (++counter < this.rowsCount);
 
     if (/10+1/.test(test.join(''))) return false;
 
@@ -87,13 +75,15 @@ class Figure {
     do {
       test.push(this.lines[p.r][p.c]);
       p.c += direction.c;
-    } while (++counter < this.getColsCount());
+    } while (++counter < this.colsCount);
 
     if (/10+1/.test(test.join(''))) return false;
 
     return true;
   }
 
-}
+  toString() {
+    return this.lines.map(row => row.join(' ')).join('\r\n');
+  }
 
-module.exports = Figure;
+}
