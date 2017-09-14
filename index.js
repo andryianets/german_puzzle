@@ -26,6 +26,10 @@ for (let f of figures) {
   f.resetRotation();
 }
 
+// const field = new Field(ROWS_COUNT, COLS_COUNT);
+// field.addFigure(figures[7], 0, 0);
+// doStep(field);
+
 /**
  * Recursive step
  * @param placement
@@ -42,10 +46,9 @@ function doStep(prevField, level = 1) {
   let subIndexPathCounter = 0;
   for (let f of freeFigures) {
     for (let rotates = 0; rotates <= f.maxRotates; rotates++) {
-      if (rowToFill + f.rowsCount > ROWS_COUNT - 1) return;
-      for (col = 0; col <= COLS_COUNT - f.colsCount; col++) {
+      for (let col = 0; col <= COLS_COUNT - f.colsCount; col++) {
         const field = prevField.clone();
-        if (subIndexPathCounter < 50 && field.addFigure(f, rowToFill, col)) {
+        if (field.addFigure(f, rowToFill, col)) {
 
           field.indexPath += `-${subIndexPathCounter++}`;
 
@@ -60,12 +63,13 @@ function doStep(prevField, level = 1) {
           }
 
           console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
-          // console.log(prevField.figureLocations);
-          // console.log(field.figureLocations);
+          console.log(prevField.toString());
+          console.log(field.toString());
 
           if (field.isFilled) {
             console.log('FOUND!!!!', field.indexPath, field.figureLocations);
-            fs.writeFileSync(`./solve-${field.indexPath}.json`, JSON.stringify(field.figureLocations));
+            fs.writeFileSync(`./solves/solve-${field.indexPath}.txt`, field.toString());
+            return;
           } else {
             doStep(field, level + 1);
           }
@@ -75,5 +79,7 @@ function doStep(prevField, level = 1) {
     }
     f.resetRotation();
   }
+
+  console.log(`<-- Back to prev level from ${level} to ${level - 1} \r\n`);
 
 }

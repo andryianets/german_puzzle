@@ -17,7 +17,7 @@ module.exports = class Field {
     this.figureIds = {};
     this.busyCells = {};
 
-    this.indexPath = '';
+    this.indexPath = '0';
   }
 
   get nextRowToFill() {
@@ -93,6 +93,18 @@ module.exports = class Field {
     this.figureIds[f.id] = true;
 
     return true;
+  }
+
+  toString() {
+    const outLines = [];
+    for (let rowCells of this.cells) {
+      const outLine = rowCells.map(cellValue => {
+        const [fId,] = (this.busyCells[cellValue] || '').split('_');
+        return fId || '·';
+      });
+      outLines.push('│ ' + outLine.join(' ') + ' │');
+    }
+    return '┌───────────────┐\r\n' + outLines.join('\r\n') + '\r\n└───────────────┘\r\n';
   }
 
 }
