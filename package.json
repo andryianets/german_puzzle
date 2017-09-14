@@ -2,19 +2,17 @@
   "name": "german_puzzle",
   "version": "1.0.0",
   "description": "polyminoes puzzle solver",
-  "repository": "https://andronix1983@bitbucket.org/andronix1983/german_puzzle.git",
+  "repository": "",
   "main": "index.js",
   "scripts": {
     "start": "node $NODE_DEBUG_OPTION index.js",
     "start-win": "node index.js",
     "debug-win": "node %NODE_DEBUG_OPTION% index.js",
-    "test": "mocha -t 12000 test.js"
+    "test": "mocha -t test.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Yury Andryianets",
+  "license": "MIT",
   "dependencies": {
-    "array-permutation": "^0.2.0",
-    "async": "^2.5.0",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
