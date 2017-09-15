@@ -11,8 +11,7 @@ const figures = figuresData.map(lines => new Figure(lines));
 
 // start here...
 let indexPathCounter = 0;
-let maxFilledCount = 0;
-let maxRow = 0;
+const stepsHashes = new Set();
 
 for (let f of figures) {
   for (let rotates = 0; rotates <= f.maxRotates; rotates++) {
@@ -25,10 +24,6 @@ for (let f of figures) {
   }
   f.resetRotation();
 }
-
-// const field = new Field(ROWS_COUNT, COLS_COUNT);
-// field.addFigure(figures[7], 0, 0);
-// doStep(field);
 
 /**
  * Recursive step
@@ -48,33 +43,21 @@ function doStep(prevField, level = 1) {
     for (let rotates = 0; rotates <= f.maxRotates; rotates++) {
       for (let col = 0; col <= COLS_COUNT - f.colsCount; col++) {
         const field = prevField.clone();
-        if (field.addFigure(f, rowToFill, col)) {
-
+        if (field.addFigure(f, rowToFill, col) && !stepsHashes.has(field.figuresHash)) {
+          stepsHashes.add(field.figuresHash);
           field.indexPath += `-${subIndexPathCounter++}`;
-
-          if (field.filledCount > maxFilledCount) {
-            maxFilledCount = field.filledCount;
-            console.log('maxFilledCount', maxFilledCount);
-          }
-
-          if (rowToFill > maxRow) {
-            maxRow = rowToFill;
-            console.log('maxRow', maxRow);
-          }
 
           // console.log('doStep', level, field.indexPath, rowToFill, `${field.filledCount}/${field.cellsCount}`);
           // console.log(prevField.toString());
           // console.log(field.toString());
 
           if (field.isFilled) {
-            const fName = `./solves/solve-${field.figuresHash}.txt`;
-            if (fs.existsSync(fName)) {
-              // console.warn('DUPLICATE!!!!', field.indexPath);
-            } else {
-              console.log('FOUND!!!!', field.indexPath);
-              console.log(field.toString());
-              fs.writeFileSync(fName, field.toString());
-            }
+            console.log('FOUND!!!!', field.indexPath);
+            console.log(field.toString());
+            const fName = `./solves/solve-${field.indexPath}.txt`;
+            fs.writeFileSync(fName, field.toString());
+
+            f.resetRotation();
             return;
           } else {
             doStep(field, level + 1);

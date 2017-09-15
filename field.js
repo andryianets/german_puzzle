@@ -18,6 +18,7 @@ module.exports = class Field {
     this.busyCells = {};
 
     this.indexPath = '0';
+    this.parent = null;
   }
 
   get nextRowToFill() {
@@ -56,6 +57,7 @@ module.exports = class Field {
     clonedField.figureIds = _.clone(this.figureIds);
     clonedField.indexPath = this.indexPath;
     clonedField.filledCount = this.filledCount;
+    clonedField.parent = this;
     return clonedField;
   }
 
@@ -105,6 +107,17 @@ module.exports = class Field {
       outLines.push(outLine.join(''));
     }
     return outLines.join('');
+  }
+
+  toSteps() {
+    const steps = [];
+    let stepField = this;
+    do {
+      steps.push(stepField.toString());
+      stepField = stepField.parent;
+    } while (stepField);
+
+    return steps.reverse();
   }
 
   toString() {
