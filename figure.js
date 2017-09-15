@@ -53,35 +53,6 @@ module.exports = class Figure {
     return this;
   }
 
-  allowedForCorner(r, c) {
-    const startPoint = {r: r ? this.lines.length - 1 : 0, c: c ? this.getColsCount() - 1 : 0};
-    const direction = {r: r ? -1 : 1, c: c ? -1 : 1};
-
-    // test rows
-    let counter = 0;
-    let test = [1];
-    let p = _.clone(startPoint);
-    do {
-      test.push(this.lines[p.r][p.c]);
-      p.r += direction.r;
-    } while (++counter < this.rowsCount);
-
-    if (/10+1/.test(test.join(''))) return false;
-
-    // test cols
-    counter = 0;
-    test = [1];
-    p = _.clone(startPoint);
-    do {
-      test.push(this.lines[p.r][p.c]);
-      p.c += direction.c;
-    } while (++counter < this.colsCount);
-
-    if (/10+1/.test(test.join(''))) return false;
-
-    return true;
-  }
-
   toString() {
     return this.lines.map(row => row.join(' ')).join('\r\n');
   }

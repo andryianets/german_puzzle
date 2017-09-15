@@ -16,7 +16,7 @@ const stepsHashes = new Set();
 for (let f of figures) {
   for (let rotates = 0; rotates <= f.maxRotates; rotates++) {
     const field = new Field(ROWS_COUNT, COLS_COUNT);
-    if (f.allowedForCorner(0, 0) && field.addFigure(f, 0, 0)) {
+    if (field.addFigure(f, 0, 0)) {
       field.indexPath = `${indexPathCounter++}`;
       doStep(field);
     }
